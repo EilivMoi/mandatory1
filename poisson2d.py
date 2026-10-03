@@ -40,6 +40,13 @@ class Poisson2D:
         xij, yij = np.meshgrid(xi, xi, indexing="ij", sparse=True)
         return xij, yij
 
+    
+    def D2(N):
+        D = sparse.diags([1, -2, 1], [-1, 0, 1], (N+1, N+1), 'lil')
+        D[0, :4] = 2, -5, 4, -1 # defines some boundaries? 
+        D[-1, -4:] = -1, 4, -5, 2
+        return D
+
     def laplace(self, N: int) -> sparse.lil_matrix:
         """Return a vectorized Laplace operator
 
@@ -52,8 +59,16 @@ class Poisson2D:
         -------
         A : scipy sparse LIL matrix
             The vectorized Laplace operator
+        
+        from lecture 6
+        def laplace(dx, dy, Nx, Ny):
+            D2x = (1./dx**2)*D2(Nx)
+            D2y = (1./dy**2)*D2(Ny)
+            return (sparse.kron(D2x, sparse.eye(Ny+1)) + sparse.kron(sparse.eye(Nx+1), D2y))
         """
-        raise NotImplementedError("The laplace method is not implemented yet.")
+
+        # xij, yij, mesh coordinates 
+        D2x = (1./)*D2(N)
 
     def assemble(
         self, N: int, f: sp.Expr, ue: sp.Expr
