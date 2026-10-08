@@ -331,9 +331,8 @@ def test_convergence_wave2d():
 
 def test_convergence_wave2d_neumann():
     solN = Wave2D_Neumann()
-    r, _, _ = solN.convergence_rates(mx=3, my=3, cfl = 0.0001)
-    #assert abs(r[-1] - 2) < 0.05
-    print(abs(r[-1] - 2))
+    r, _, _ = solN.convergence_rates(mx=3, my=3, cfl = 0.0012)
+    assert abs(r[-1] - 2) < 0.05
 
 
 def test_exact_wave2d():
