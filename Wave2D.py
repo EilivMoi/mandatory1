@@ -334,13 +334,47 @@ def test_convergence_wave2d_neumann():
     r, _, _ = solN.convergence_rates(mx=3, my=3, cfl = 0.0012)
     assert abs(r[-1] - 2) < 0.05
 
-
 def test_exact_wave2d():
-    raise NotImplementedError("The test_exact_wave2d function is not implemented yet.")
+    mx = my = 2                         # standing‑wave mode numbers
+    C_target = 1.0 / np.sqrt(2)         # critical Courant number
+    N = 64                              # spatial resolution
+    c = 1.0                             # wave speed
+
+    periods = 4
+    Nt = periods * N               
+
+    def run_solver(solver_class):
+
+        solver = solver_class()                      
+        dx, err_arr = solver(N, Nt,
+                             cfl=C_target, c=c,
+                             mx=mx, my=my,
+                             store_data=-1)
+
+        err = err_arr.item()        
 
 
+        assert np.isclose(solver.w, solver._omega_exact(),
+                          atol=1e-14, rtol=0), (
+            f"Dispersion mismatch for {solver_class.__name__}: "
+            f"w={solver.w:.3e}, we={solver._omega_exact():.3e}"
+        )
+
+        assert err < 1e-12, (
+            f"l2 error too large for {solver_class.__name__}: {err:.3e}"
+        )
+        return err
+
+    err_dirichlet = run_solver(Wave2D)               # Dirichlet BC
+    err_neumann   = run_solver(Wave2D_Neumann)      # Neumann BC
+
+
+    print("exact solution passed")
+    print(f"    Dirichlet l2 error = {err_dirichlet:.3e}")
+    print(f"    Neumann   l2 error = {err_neumann:.3e}")
 
 if __name__ == "__main__":
     test_convergence_wave2d()
     test_convergence_wave2d_neumann()
+    test_exact_wave2d()
     print("All tests passed!")
